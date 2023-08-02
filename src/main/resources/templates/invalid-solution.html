@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Invalid Solution</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .spacer {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Invalid Solution</h1>
+<p>There are only <span th:text="${maxSolutions}"></span> solutions for a board of size <span th:text="${size}"></span>.</p>
+<div class="spacer"></div>
+</body>
+</html>

@@ -36,8 +36,9 @@ public class QueensControllerTests {
     @InjectMocks
     private QueensController queensController;
 
+
     @Test
-    public void testGetQueensSolutions_ValidSize_ReturnsOkResponse() throws Exception {
+    public void getAllSolutionsForSize_ValidSize_ReturnsOkResponse() throws Exception {
         int size = 4;
         List<List<Integer>> solutions = List.of(
                 List.of(1, 3, 0, 2),
@@ -52,7 +53,6 @@ public class QueensControllerTests {
                 .andReturn();
 
         String jsonResponse = result.getResponse().getContentAsString();
-        System.out.println("JSON Response: " + jsonResponse);
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode responseJsonNode = objectMapper.readTree(jsonResponse);
@@ -60,35 +60,60 @@ public class QueensControllerTests {
 
         List<List<Integer>> actualSolutions = objectMapper.readValue(
                 solutionsJsonNode.traverse(),
-                new TypeReference<List<List<Integer>>>() {});
+                new TypeReference<List<List<Integer>>>() {
+                });
 
         assertEquals(solutions, actualSolutions);
     }
 
     @Test
-    public void testGetQueensSolutions_InvalidSize_ReturnsBadRequest() throws Exception {
+    public void getAllSolutionsForSize_InvalidSize_ReturnsBadRequest() throws Exception {
         int size = 0;
+
+        RequestBuilder request = MockMvcRequestBuilders.get("/nqueens/{size}", size);
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Size needs to be a positive number greater than zero"));
+    }
+
+    @Test
+    public void getAllSolutionsForSize_TwoOrThree_ReturnsEmptyArray() throws Exception {
+        int size = 2;
 
         RequestBuilder request = MockMvcRequestBuilders.get("/nqueens/{size}", size);
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.solutions").isEmpty());
+                .andExpect(jsonPath("$.solutions").isEmpty())
+                .andExpect(jsonPath("$.solutions").isArray());
     }
 
     @Test
-    public void testGetQueensSolutions_SizeTooBig_ReturnsBadRequest() throws Exception {
+    public void getAllSolutionsForSize_SizeTooBig_ReturnsBadRequest() throws Exception {
         int size = 15;
 
         RequestBuilder request = MockMvcRequestBuilders.get("/nqueens/{size}", size);
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Size too big"));
+                .andExpect(jsonPath("$.message").value(String.format("Size cannot be greater than %s", QueensController.MAX_SIZE)));
     }
 
     @Test
-    public void testGetQueensSolution_ValidInput_ReturnsOkResponse() throws Exception {
+    public void getSingleSolutionForSize_InvalidSize_ReturnsBadRequest() throws Exception {
+        int size = 13;
+        int solutionNumber = 1;
+
+        RequestBuilder request = MockMvcRequestBuilders.get("/nqueens/{size}/{solutionNumber}", size, solutionNumber);
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(containsString("Size cannot be greater than 12")));
+    }
+
+    @Test
+    public void getSingleSolutionForSize_ValidInput_ReturnsOkResponse() throws Exception {
         int size = 4;
         int solutionNumber = 1;
         List<List<Integer>> solutions = List.of(
@@ -102,23 +127,16 @@ public class QueensControllerTests {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string(containsString("0100\n0001\n1000\n0010\n")));
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(size))
+                .andExpect(jsonPath("$[0]").value(1))
+                .andExpect(jsonPath("$[1]").value(3))
+                .andExpect(jsonPath("$[2]").value(0))
+                .andExpect(jsonPath("$[3]").value(2));
     }
 
     @Test
-    public void testGetQueensSolution_InvalidSize_ReturnsBadRequest() throws Exception {
-        int size = 3;
-        int solutionNumber = 1;
-
-        RequestBuilder request = MockMvcRequestBuilders.get("/nqueens/{size}/{solutionNumber}", size, solutionNumber);
-        mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string("Invalid size."));
-    }
-
-    @Test
-    public void testGetQueensSolution_SolutionNotFound_ReturnsNotFound() throws Exception {
+    public void getSingleSolutionForSize_SolutionNotFound_ReturnsNotFound() throws Exception {
         int size = 4;
         int solutionNumber = 3;
         List<List<Integer>> solutions = List.of(
@@ -132,6 +150,48 @@ public class QueensControllerTests {
         mockMvc.perform(request)
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string("Solution not found."));
+                .andExpect(content().string(containsString("There are only 2 solutions for a board of size 4")));
+    }
+
+    @Test
+    public void testInvalidInputSize() throws Exception {
+        RequestBuilder request = MockMvcRequestBuilders.get("/nqueens/{size}/{solutionNumber}/display", -1, 1);
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(view().name("invalid-size"));
+    }
+
+    @Test
+    public void testDisplaySingleSolutionForSize_ValidInput_ReturnsCorrectViewAndModelAttributes() throws Exception {
+        int size = 4;
+        int solutionNumber = 2;
+        List<List<Integer>> solutions = List.of(
+                List.of(1, 3, 0, 2),
+                List.of(2, 0, 3, 1)
+        );
+        when(queensService.solveNQueens(size)).thenReturn(solutions);
+
+        RequestBuilder request = MockMvcRequestBuilders.get("/nqueens/{size}/{solutionNumber}/display", size, solutionNumber);
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(view().name("solution"))
+                .andExpect(model().attribute("size", size))
+                .andExpect(model().attribute("solutionNumber", solutionNumber))
+                .andExpect(model().attributeExists("chessboard"));
+    }
+
+    @Test
+    public void testDisplaySingleSolutionForSize_ValidInputInvalidSolution_ReturnsCorrectViewAndModelAttributes() throws Exception {
+        List<List<Integer>> solutions = List.of(List.of(1, 2), List.of(2, 1));
+        when(queensService.solveNQueens(4)).thenReturn(solutions);
+
+        RequestBuilder request = MockMvcRequestBuilders.get("/nqueens/{size}/{solutionNumber}/display", 4, 3);
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(view().name("invalid-solution"))
+                .andExpect(model().attribute("maxSolutions", 2));
     }
 }

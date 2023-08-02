@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>N-Queens Solution</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffe8d6
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        td {
+            width: 40px;
+            height: 40px;
+            border: 1px solid black;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .even {
+            background-color: grey; /* Black cells */
+            color: white;
+        }
+
+        .odd {
+            background-color: white; /* White cells */
+            color: black;
+        }
+
+        .queen {
+            color: gold; /* Queens */
+        }
+
+        .spacer {
+            margin-bottom: 20px;
+        }
+
+        .highlight-horizontal {
+            background-color: lightcoral;
+        }
+
+        .highlight-vertical {
+            background-color: lightcoral;
+        }
+
+        .highlight-diagonal {
+            background-color: lightcoral;
+        }
+    </style>
+</head>
+<body>
+<h1>N-Queens Solution</h1>
+<h2>Board Size: <span th:text="${size}"></span></h2>
+<h2>Solution Number: <span th:text="${solutionNumber}"></span></h2>
+
+<table>
+    <tr th:each="row, rowStat : ${chessboard}">
+        <td th:each="cell, cellStat : ${row}" th:class="${(rowStat.count + cellStat.count) % 2 == 0 ? 'even' : 'odd'}">
+            <div th:if="${cell == 1}" class="queen">&#9813;</div> <!-- Display queen as a gold chess piece (♛) -->
+        </td>
+    </tr>
+</table>
+
+<div class="spacer"></div>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cells = document.querySelectorAll('td');
+            cells.forEach(cell => {
+                cell.addEventListener('mouseenter', function () {
+                    if (this.querySelector('.queen')) {
+                        const rowIndex = this.parentNode.rowIndex;
+                        const colIndex = this.cellIndex;
+
+                        cells.forEach(cell => cell.classList.remove('highlight-horizontal', 'highlight-vertical', 'highlight-diagonal'));
+
+                        cells.forEach((cell, index) => {
+                            if (cell.cellIndex === colIndex || cell.parentNode.rowIndex === rowIndex) {
+                                cell.classList.add('highlight-horizontal');
+                            }
+                        });
+
+                        cells.forEach((cell, index) => {
+                            const cellRowIndex = cell.parentNode.rowIndex;
+                            const cellColIndex = cell.cellIndex;
+                            if (Math.abs(rowIndex - cellRowIndex) === Math.abs(colIndex - cellColIndex)) {
+                                cell.classList.add('highlight-diagonal');
+                            }
+                        });
+                    }
+                });
+
+                cell.addEventListener('mouseleave', function () {
+                    cells.forEach(cell => cell.classList.remove('highlight-horizontal', 'highlight-vertical', 'highlight-diagonal'));
+                });
+            });
+        });
+    </script>
+</body>
+</html>
