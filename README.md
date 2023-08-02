@@ -27,8 +27,9 @@ Retrieve all possible solutions to the N-Queens problem for a given board size.
   - `size` (integer): The board size (N) for which to find the solutions.
 
 - **Response:**
-  - If the size is not valid (<= 0, 2, or 3), it returns an empty JSON array.
-  - If the size is too large (greater than the maximum defined size), it returns a JSON error response.
+  - If the size is not valid <= 0 it returns a 400 bad request.
+  - If the size is 2 or 3 (e.g. no solutions available) it returns an empty list.
+  - If the size is too large (greater than the maximum defined size 12), it returns a 400 bad request.
   - Otherwise, it returns a JSON array containing all the solutions.
 
 #### Get Single N-Queens Solution
@@ -43,7 +44,7 @@ Retrieve a specific solution to the N-Queens problem for a given board size and 
 
 - **Response:**
   - If the size is not valid (<= 3 or greater than the maximum defined size), it returns a plain text "Invalid size." error.
-  - If the solution number is not valid (<= 0 or greater than the total number of solutions), it returns a plain text "Solution not found." error.
+  - If the solution number is not valid (<= 0 or greater than the total number of solutions), it returns a 404 not found error.
   - Otherwise, it returns an array where the index corresponds to the row and the current element to the column the queen is in.
 
 **GET /nqueens/{size}/{solutionNumber}/display**
@@ -55,6 +56,6 @@ Retrieve a specific solution to the N-Queens problem for a given board size and 
   - `solutionNumber` (integer): The index of the solution in the list of solutions.
 
 - **Response:**
-  - If the size is not valid (<= 3 or greater than the maximum defined size), it returns a plain text "Invalid size." error.
-  - If the solution number is not valid (<= 0 or greater than the total number of solutions), it returns a plain text "Solution not found." error.
-  - Otherwise, it takes the user to an interactive HTML page that shows the chess board and if you hover on any queen it will highlight their vertical, horizontal, and diagonal lines.
+  - If the size is not valid (<= 0, 2 or 3 or greater than the maximum defined size), it shows the user an error page.
+  - If the solution number is not valid (<= 0 or greater than the total number of solutions), it shows the user an error page.
+  - Otherwise, it takes the user to an interactive HTML page that shows the chess board and when hovering over any queen, it highlights their vertical, horizontal, and diagonal lines.
