@@ -9,12 +9,12 @@ import static org.junit.Assert.assertEquals;
 
 class QueensServiceTests {
 
-    QueensService queensServiceMock;
+    QueensService queensService;
 
 
     @BeforeEach
     void setUp() {
-        queensServiceMock = new QueensService();
+        queensService = new QueensService();
     }
 
     @Test
@@ -25,7 +25,7 @@ class QueensServiceTests {
                 List.of(2, 0, 3, 1)
         );
 
-        List<List<Integer>> actualSolutions = queensServiceMock.solveNQueens(size);
+        List<List<Integer>> actualSolutions = queensService.solveNQueens(size);
 
         assertEquals(expectedSolutions, actualSolutions);
     }
