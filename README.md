@@ -18,7 +18,7 @@ The N-Queens Solver Web Application is a user-friendly tool that allows users to
 - Mockito
 - FasterXML/Jackson
 
-##SpringBoot endpoints:
+## SpringBoot endpoints:
 
 **GET /nqueens/{size}**
 Retrieve all possible solutions to the N-Queens problem for a given board size.
