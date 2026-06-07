@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>N-Queens Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chess-cell { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center">
+        <h1 class="text-4xl font-bold mb-6 text-indigo-700">N-Queens Solver</h1>
+        <form th:action="@{/nqueens}" method="get" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">Board Size (N)</label>
+                <input type="number" name="size" min="1" th:max="${maxSize}" required
+                       class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <button type="submit"
+                    class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                Solve
+            </button>
+        </form>
+        <p class="mt-6 text-sm text-gray-500">Solutions cached • Max N = <span th:text="${maxSize}"></span></p>
+    </div>
+</body>
+</html>
